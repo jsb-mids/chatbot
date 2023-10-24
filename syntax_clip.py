@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import time
 
+
 import cv2
 import glob
 import tensorflow as tf
@@ -24,28 +25,28 @@ import os
 import glob
 import pandas as pd
 
-import openai
-openai.api_key = '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'
-
-
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model, preprocess = clip.load("ViT-B/32", device=device)
 
 img = []
 uid = []
-for file in glob.glob('/Users/jujharbedi/Desktop/image/*.*'):
+for file in glob.glob('/Users/siddharthashokkumar/Desktop/shuowang_github/notebook/demo_data/image/*.*'):
   # img.append(tf.convert_to_tensor(cv2.imread(file)))
   image = preprocess(Image.open(file)).unsqueeze(0)
   img.append(image)
 
 
-for filename in os.listdir('/Users/jujharbedi/Desktop/image'):
+for filename in os.listdir('/Users/siddharthashokkumar/Desktop/shuowang_github/notebook/demo_data/image'):
     if filename.endswith("jpg"):
         uid.append(filename.strip('.jpg'))
 
 
 data = pd.DataFrame(list(zip(uid, img)),
               columns=['uid','encoded_image'])
+
+# print(data.head())
+
+
 
 class Timer:
     def __init__(self):
@@ -95,7 +96,10 @@ class Timer:
         td = t2 - self.t1
 
         print(self.delta_to_string(td))
-        
+
+import openai
+openai.api_key = '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'
+
 
 def find_products(text_input, data):
     print(f"finding products for query: {text_input}...")
@@ -135,7 +139,8 @@ def show_images(res):
 
 
 def image_path(uid):
-    return osp.join('/Users/jujharbedi/Desktop/image', f"{uid}.jpg")
+    return osp.join('/Users/siddharthashokkumar/Desktop/shuowang_github/notebook/demo_data/image', f"{uid}.jpg")
+
 
 messages = []
 
@@ -145,17 +150,8 @@ prefix = (
     "considering what the user asked before, what is the user looking for with the following request."
     " Only respond with the product description no more than 30 words:"
 )
-
-bot_name = "Sam"
-
-
-def get_response(message):
-    print("Let's chat! (type 'quit' to exit)")
-    # while True:
-    # message = input("User : ")
-    if message == "quit":
-        exit
-
+while True:
+    message = input("User : ")
     if message:
         print(f"User entered: {message}")
         messages.append(
@@ -165,26 +161,13 @@ def get_response(message):
             model="gpt-3.5-turbo", messages=messages
         )
 
-        resp = chat.choices[0].message.content
-        print(f"ChatGPT: {resp}")
+        reply = chat.choices[0].message.content
+        print(f"ChatGPT: {reply}")
 
         with Timer():
-            # print("looking for products...")
-            #res_list.append(find_products(resp, data))
-            #show_images(res_list[-1])
+            print("looking for products...")
+            res_list.append(find_products(reply, data))
+            show_images(res_list[-1])
             print("found products")
-            return resp
 
-            #return messages.append({"role": "assistant", "content": resp})
-
-# if __name__ == "__main__":
-#     print("Let's chat! (type 'quit' to exit)")
-#     while True:
-#         # sentence = "do you use credit cards?"
-#         message = input("User: ")
-#         # print(f"User entered: {message}")
-#         # if message == "quit":
-#         #     break
-
-#         resp = get_response(message)
-#         print(resp)
+        messages.append({"role": "assistant", "content": reply})

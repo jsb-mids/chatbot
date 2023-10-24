@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <div class="image-container">
+        <div class="image-with-title">
+            {% for img in images %}
+            <div class="title">{{img.title}}</div>
+            <img src = {{img.src}}>
+            {% endfor %}
+        </div>
+    </div>
+</html>
